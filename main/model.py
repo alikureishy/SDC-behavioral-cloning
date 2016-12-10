@@ -39,23 +39,25 @@ def create_model(params):
 def predict(model, params, Xs, Ys):
     model.predict(Xs, Ys, batch_size=params.test_batch_size, verbose=1)
 
-def write_model(model, filename):
-    jsonfile = filename+'.json'
+def write_model(model, modelname):
+    jsonfile = modelname+'.json'
     print ("Writing model to file: ", jsonfile)
     json = model.to_json()
-    hd5file = filename+'.hd5'
     with open(jsonfile, 'w') as jfile:
         jfile.write(json)
+
+    hd5file = modelname+'.hd5'
     print ("Writing mweights to file: ", hd5file)
     model.save_weights(hd5file)
     return jsonfile, hd5file
 
-def read_model(filename):
-    jsonfile = filename+'.json'
+def read_model(modelname):
+    jsonfile = modelname+'.json'
     print ("Reading model from file: ", jsonfile)
     with open(jsonfile, 'r') as jfile:
         model = model_from_json(jfile.read())
-    hd5file = filename+'.hd5'
+
+    hd5file = modelname+'.hd5'
     print ("Reading weights from file: ", hd5file)
     model.load_weights(hd5file)
     return model
