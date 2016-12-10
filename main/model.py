@@ -33,7 +33,6 @@ def create_model(params):
     model.add(Dropout(0.5))
     model.add(Dense(1))
     #model.add(Activation())
-    model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
     
     return model
 
@@ -42,17 +41,21 @@ def predict(model, params, Xs, Ys):
 
 def write_model(model, filename):
     jsonfile = filename+'.json'
+    print ("Writing model to file: ", jsonfile)
     json = model.to_json()
     hd5file = filename+'.hd5'
-    with open(filename, 'w') as jfile:
+    with open(jsonfile, 'w') as jfile:
         jfile.write(json)
+    print ("Writing mweights to file: ", hd5file)
     model.save_weights(hd5file)
     return jsonfile, hd5file
 
-def read_model(model, filename):
+def read_model(filename):
     jsonfile = filename+'.json'
+    print ("Reading model from file: ", jsonfile)
     with open(jsonfile, 'r') as jfile:
-        model = model_from_json(jfile.load())
+        model = model_from_json(jfile.read())
     hd5file = filename+'.hd5'
+    print ("Reading weights from file: ", hd5file)
     model.load_weights(hd5file)
     return model
