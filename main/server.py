@@ -14,13 +14,13 @@ from io import BytesIO
 
 from keras.models import model_from_json
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array
-from model import read_model
 import cv2
-
+from os.path import isfile
+from common import get_trainer
 
 sio = socketio.Server()
 app = Flask(__name__)
-model = None
+trainer = None
 prev_image_array = None
 
 @sio.on('telemetry')
@@ -35,12 +35,12 @@ def telemetry(sid, data):
     imgString = data["image"]
     image = Image.open(BytesIO(base64.b64decode(imgString)))
     image_array = np.asarray(image)
-    image_array = cv2.resize(image_array, (32, 32)) # This line was added. Remove when ready.
+    image_array = cv2.resize(image_array, (128, 128)) # This line was added. Remove when ready.
     transformed_image_array = image_array[None, :, :, :]
     
-    # This model currently assumes that the features of the model are just the images. Feel free to change this.
-    steering_angle = float(model.predict(transformed_image_array, batch_size=1))
-    # The driving model currently just outputs a constant throttle. Feel free to edit this.
+    # This basetrainer currently assumes that the features of the basetrainer are just the images. Feel free to change this.
+    steering_angle = float(trainer.predict(transformed_image_array, batch_size=1))
+    # The driving basetrainer currently just outputs a constant throttle. Feel free to edit this.
     throttle = 0.2
     print(steering_angle, throttle)
     send_control(steering_angle, throttle)
@@ -64,13 +64,12 @@ if __name__ == '__main__':
     print ("#                   SERVER                    #")
     print ("###############################################")
     parser = argparse.ArgumentParser(description='Remote Driving')
-    parser.add_argument('--model_name', '-mn', type=str,
-    help='Path to model definition json. Model weights should be on the same path.')
+    parser.add_argument('-n', '--model_name', type=str, required=True, help='Path to basetrainer definition json. Model weights should be on the same path.')
+    parser.add_argument('-a', '--arch', dest='arch', required=True, type=str, help='Architecture of model. [vgg16, googlenet, commaai, none]')
     args = parser.parse_args()
-    #with open(args.model, 'r') as jfile:
-    #    model = model_from_json(json.load(jfile))
-    model = read_model(args.model_name)
-    model.compile("adam", "mse")
+
+    # Get hold of the trainer
+    trainer = get_trainer(args.arch, args.model_name)
 
     # wrap Flask application with engineio's middleware
     app = socketio.Middleware(sio, app)

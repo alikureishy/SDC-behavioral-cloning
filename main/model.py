@@ -1,63 +1,63 @@
-# This is the module that builds the model. All model architecture details are encapsulated here
-from keras import backend as K
-from keras.datasets import mnist
-from keras.models import Model
-from keras.layers import Input, Dense
-from keras.layers import Convolution2D, MaxPooling2D
-from keras.layers import Input, Dense, Dropout, Activation, Flatten
-from keras.models import Sequential, model_from_json
-from keras.utils import np_utils
-from sklearn.model_selection import train_test_split
-from sklearn.utils import shuffle
-from tensorflow.contrib.learn.python.learn.learn_io import pandas_io
+'''
+Created on Dec 7, 2016
 
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
+@author: safdar
+'''
+import argparse
+from common import get_driving_log, get_trainer, read_csv, extract, datagen, batchgen, Center, Left, Right, Steer
+from sklearn.cross_validation import train_test_split
 import numpy as np
+from sklearn.utils import shuffle
 
-def create_model(params):
-    nb_filters = 16
-    kernel_size = (3, 3)
-    pool_size = (2, 2)
+if __name__ == '__main__':
+    print ("###############################################")
+    print ("#                   TRAINER                   #")
+    print ("###############################################")
+
+    parser = argparse.ArgumentParser(description='Remote Driving')
+    parser.add_argument('-n', '--model_name', dest='model_name', required=True, type=str, help='Name of model folder')
+    parser.add_argument('-a', '--arch', dest='arch', required=True, type=str, help='Architecture of model. [vgg16, googlenet, commaai, none]')
+    parser.add_argument('-t', '--training_data_folder', dest='training_data_folder', default='.', type=str)
+    parser.add_argument('-v', '--validation_data_folder', dest='validation_data_folder', default='.')
+    parser.add_argument('-e', '--num_epochs', dest='num_epochs', default=10, type=int)
+    parser.add_argument('-b', '--batch_size', dest='batch_size', default=100, type=int)
+    parser.add_argument('-o', '--overwrite', dest='overwrite', action='store_true', help='Overwrite model after training (default: false)')
+    parser.add_argument('-r', '--dry_run', dest='dry_run', action='store_true', help='Dry run. Will not attempt to save anything.')
+    args = parser.parse_args()
+
+    # Obtain the trainer
+    trainer = get_trainer(args.arch, args.model_name, args.overwrite)
     
-    model = Sequential()
-    model.add(Convolution2D(nb_filters, kernel_size[0], kernel_size[1], border_mode='valid', input_shape=params.image_shape))
-    model.add(Activation('relu'))
-    #model.add(Convolution2D(nb_filters, kernel_size[0], kernel_size[1]))
-    #model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=pool_size))
-    model.add(Dropout(0.25))
-    model.add(Flatten()) # batch_input_shape=(None,32,32,3)
-    model.add(Dense(128))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(1))
-    #model.add(Activation())
+    # Read training data
+    driving_log = get_driving_log(args.training_data_folder)
+    rows = read_csv(driving_log)
+    (centerfiles, centersteerings) = extract(rows, Center, Steer)
     
-    return model
+    # Some training data pre-processing:
+    (leftfiles, leftsteerings) = extract(rows, Left, Steer)
+    (leftfiles, leftsteerings) = (leftfiles, [steering+0.5 for steering in leftsteerings])
+    (rightfiles, rightsteerings) = extract(rows, Right, Steer)
+    (rightfiles, rightsteerings) = (rightfiles, [steering-0.5 for steering in rightsteerings])
+    (imagefiles, steerings) = (np.concatenate((centerfiles, leftfiles, rightfiles)), np.concatenate((centersteerings, leftsteerings, rightsteerings)))
+    (imagefiles, steerings) = shuffle(imagefiles, steerings)
+    x_train, x_val, y_train, y_val = train_test_split(imagefiles, steerings)
+#     x_train, x_val, y_train, y_val = x_train[0:200], x_val[0:200], y_train[0:200], y_val[0:200]
+    
 
-def predict(model, params, Xs, Ys):
-    model.predict(Xs, Ys, batch_size=params.test_batch_size, verbose=1)
+    # Memory-efficient generators
+    traindata = datagen(x_train, y_train, trainer.get_image_shape())
+    validationdata = datagen(x_val, y_val, trainer.get_image_shape())
+    
+    trainbatcher = batchgen(traindata, args.batch_size)
+    validationbatcher = batchgen(validationdata, args.batch_size)
 
-def write_model(model, modelname):
-    jsonfile = modelname+'.json'
-    print ("Writing model to file: ", jsonfile)
-    json = model.to_json()
-    with open(jsonfile, 'w') as jfile:
-        jfile.write(json)
+    # Train the basetrainer
+    trainer.train_with(trainbatcher, len(x_train), validation_data=validationbatcher, nb_val_samples=len(x_val), num_epochs=args.num_epochs)
+    
+    # Finally, determine what to do with the basetrainer
+    if args.dry_run:
+        print ("Dry run. Nothing will be saved.")
+    else:
+        trainer.checkpoint()
 
-    hd5file = modelname+'.hd5'
-    print ("Writing mweights to file: ", hd5file)
-    model.save_weights(hd5file)
-    return jsonfile, hd5file
-
-def read_model(modelname):
-    jsonfile = modelname+'.json'
-    print ("Reading model from file: ", jsonfile)
-    with open(jsonfile, 'r') as jfile:
-        model = model_from_json(jfile.read())
-
-    hd5file = modelname+'.hd5'
-    print ("Reading weights from file: ", hd5file)
-    model.load_weights(hd5file)
-    return model
+    print ("Thank you! Come again!")
