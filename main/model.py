@@ -5,9 +5,9 @@ Created on Dec 7, 2016
 '''
 import argparse
 from common import get_driving_log, get_trainer, read_csv, extract, datagen, batchgen, Center, Left, Right, Steer
-from sklearn.cross_validation import train_test_split
 import numpy as np
 from sklearn.utils import shuffle
+from sklearn.model_selection._split import train_test_split
 
 if __name__ == '__main__':
     print ("###############################################")
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     (rightfiles, rightsteerings) = (rightfiles, [steering-0.5 for steering in rightsteerings])
     (imagefiles, steerings) = (np.concatenate((centerfiles, leftfiles, rightfiles)), np.concatenate((centersteerings, leftsteerings, rightsteerings)))
     (imagefiles, steerings) = shuffle(imagefiles, steerings)
-    x_train, x_val, y_train, y_val = train_test_split(imagefiles, steerings)
+    x_train, x_val, y_train, y_val = train_test_split(imagefiles, steerings, test_size=0.20, random_state=0)
 #     x_train, x_val, y_train, y_val = x_train[0:200], x_val[0:200], y_train[0:200], y_val[0:200]
     
 
