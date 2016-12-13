@@ -16,12 +16,12 @@ if __name__ == '__main__':
     print ("###############################################")
 
     parser = argparse.ArgumentParser(description='Remote Driving')
-    parser.add_argument('-n', '--model_name', dest='model_name', required=True, type=str, help='Name of model folder')
-    parser.add_argument('-a', '--arch', dest='arch', required=True, type=str, help='Architecture of model. [vgg16, googlenet, commaai, none]')
-    parser.add_argument('-t', '--training_data_folders', required=True, nargs='*', dest='training_data_folders', type=str, help="Space-separated list of 1 or more folders.")
-    parser.add_argument('-e', '--num_epochs', dest='num_epochs', default=10, type=int)
-    parser.add_argument('-b', '--batch_size', dest='batch_size', default=100, type=int)
-    parser.add_argument('-o', '--overwrite', dest='overwrite', action='store_true', help='Overwrite model after training (default: false)')
+    parser.add_argument('-n', '--model_name', dest='model_name', required=True, type=str, help='Name of FOLDER where the model files reside.')
+    parser.add_argument('-a', '--arch', dest='arch', required=True, type=str, help='Architecture of model. [custom1, custom2]')
+    parser.add_argument('-t', '--training_data_folders', required=True, nargs='*', dest='training_data_folders', type=str, help="Space-separated list of 1 or more folders containing training data (driving_log and IMG folders).")
+    parser.add_argument('-e', '--num_epochs', dest='num_epochs', default=10, type=int, help="Number of epochs to train on prior to checkpointing the updated model.")
+    parser.add_argument('-b', '--batch_size', dest='batch_size', default=100, type=int, help="Size of the training, validation and test batches.")
+    parser.add_argument('-o', '--overwrite', dest='overwrite', action='store_true', help='Overwrite model files after training if they already exist (default: false)')
     parser.add_argument('-r', '--dry_run', dest='dry_run', action='store_true', help='Dry run. Will not attempt to save anything.')
     args = parser.parse_args()
 

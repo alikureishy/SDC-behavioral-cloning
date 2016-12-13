@@ -1,1 +1,11 @@
-This is a work in progress. Long way to go still. Replicate at your own risk!
+# Overview
+This application provides utilities to train a model for driving a car through a set of given tracks.
+
+## Trainer (model.py)
+This tool performs the training. It can be invoked as follows:
+> python model.py -n <model-folder> -a <architecture> -t <training-folder>[<training-folder>]* [-e <num_epochs>] [-b <batch_size>] [-o]
+
+## Server/Driver (drive.py)
+This is the same as 'drive.py' that was provided in the project.
+
+ 
