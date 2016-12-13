@@ -16,7 +16,7 @@ from keras.models import model_from_json
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array
 import cv2
 from os.path import isfile
-from common import get_trainer
+from common import get_trainer, resize_image, normalize_image
 
 sio = socketio.Server()
 app = Flask(__name__)
@@ -34,14 +34,15 @@ def telemetry(sid, data):
     # The current image from the center camera of the car
     imgString = data["image"]
     image = Image.open(BytesIO(base64.b64decode(imgString)))
-    image_array = np.asarray(image)
-    image_array = cv2.resize(image_array, (128, 128)) # This line was added. Remove when ready.
-    transformed_image_array = image_array[None, :, :, :]
+    image = np.asarray(image)
+    image = resize_image(image, trainer.get_image_shape())
+    image = normalize_image(image)
+    transformed_image_array = image[None, :, :, :]
     
     # This basetrainer currently assumes that the features of the basetrainer are just the images. Feel free to change this.
-    steering_angle = float(trainer.predict(transformed_image_array, batch_size=1))
+    steering_angle = float(trainer.predict(transformed_image_array, batchsize=1))
     # The driving basetrainer currently just outputs a constant throttle. Feel free to edit this.
-    throttle = 0.2
+    throttle = 20
     print(steering_angle, throttle)
     send_control(steering_angle, throttle)
 

@@ -20,7 +20,8 @@ class BaseTrainer(object):
 
     @classmethod
     def get_image_shape(self):
-        raise "Not implemented"
+        # TODO: I don't think this will work
+        return self.__model__.input.shape()
 
     def checkpoint(self):
         (json, hd5) = self.__write_model__()
@@ -68,16 +69,16 @@ class BaseTrainer(object):
             idx = self.__id__
         else:
             for idx in range(0, 1000):
-                if not isfile(self.__getmodelpath__(str(idx))):
+                if not isfile(self.__getmodelpath__(idx)):
                     break
 
-        jsonfile = self.__getmodelpath__(str(idx))
+        jsonfile = self.__getmodelpath__(idx)
         print ("Writing model to file: ", jsonfile)
         json = self.__model__.to_json()
         with open(jsonfile, 'w') as jfile:
             jfile.write(json)
 
-        hd5file = self.__getweightspath__(str(idx))
+        hd5file = self.__getweightspath__(idx)
         print ("Writing mweights to file: ", hd5file)
         self.__model__.save_weights(hd5file)
     
@@ -91,16 +92,19 @@ class BaseTrainer(object):
         # find the last model file in folder
         idx = None
         for idx in range(0, 1000):
-            if not isfile(self.__getmodelpath__(str(idx))):
+            if not isfile(self.__getmodelpath__(idx)):
                     break
-        idx = idx - 1 if idx > 0 else None
+        if idx==0:
+            return None # No model exists if it couldn't even find id = 0
+        else:
+            idx = idx - 1
 
-        jsonfile = self.__getmodelpath__(str(idx))
+        jsonfile = self.__getmodelpath__(idx)
         print ("Reading model from file: ", jsonfile)
         with open(jsonfile, 'r') as jfile:
             model = model_from_json(jfile.read())
 
-        hd5file = self.__getweightspath__(str(idx))
+        hd5file = self.__getweightspath__(idx)
         print ("Reading weights from file: ", hd5file)
         model.load_weights(hd5file)
         

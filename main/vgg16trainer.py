@@ -31,8 +31,15 @@ class VGG16Trainer(object):
 
     def __create_model__(self):
         # Then step through the training stages
-        model = VGG16(include_top=False)
+        vggmodel = VGG16(include_top=False, weights='imagenet')
         
+        x = vggmodel.output
+        x = Flatten(input_shape=x.shape[1:])(x)
+        x = Dense(256, activation='relu')(x)
+        x = Dropout(0.5)(x)
+        custom = Model(vggmodel.input, x)        
+
+
         #...
         #...
 
