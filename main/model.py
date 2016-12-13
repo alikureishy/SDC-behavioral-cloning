@@ -8,6 +8,7 @@ from common import get_driving_logs, get_trainer, read_csv, extract, datagen, ba
 import numpy as np
 from sklearn.utils import shuffle
 from sklearn.model_selection._split import train_test_split
+from random import randint
 
 if __name__ == '__main__':
     print ("###############################################")
@@ -31,7 +32,7 @@ if __name__ == '__main__':
     driving_logs = get_driving_logs(*args.training_data_folders)
     rows = read_csv(*driving_logs)
     (centerfiles, centersteerings) = extract(rows, Center, Steer)
-    (imagefiles, steerings) = (centerfiles, centersteerings) 
+    (imagefiles, steerings) = shuffle(centerfiles, centersteerings, random_state=randint(0,100))
 
     # Some training data pre-processing:
 #    (leftfiles, leftsteerings) = extract(rows, Left, Steer)
@@ -43,8 +44,8 @@ if __name__ == '__main__':
     
     print ("Steering values: min {} / max {} / average {} ".format(min(steerings), max(steerings), np.mean(steerings)))
     
-    x_train, x_val, y_train, y_val = train_test_split(imagefiles, steerings, test_size=0.30, random_state=0)
-    x_val, x_test, y_val, y_test = train_test_split(x_val, y_val, test_size=0.50, random_state=0)
+    x_train, x_val, y_train, y_val = train_test_split(imagefiles, steerings, test_size=0.30, random_state=randint(0,100))
+    x_val, x_test, y_val, y_test = train_test_split(x_val, y_val, test_size=0.50, random_state=randint(0,100))
 #     x_train, x_val, y_train, y_val = x_train[0:200], x_val[0:200], y_train[0:200], y_val[0:200]
     
     print ("Splits [Total {}]: Training = {}, Validation = {}, Test = {}".format(len(imagefiles), len(x_train), len(x_val), len(x_test)))
