@@ -33,27 +33,19 @@ if __name__ == '__main__':
     rows = read_csv(*driving_logs)
     (centerfiles, centersteerings) = extract(rows, Center, Steer)
     (imagefiles, steerings) = shuffle(centerfiles, centersteerings, random_state=randint(0,100))
-
-    # Some training data pre-processing:
-#    (leftfiles, leftsteerings) = extract(rows, Left, Steer)
-#    (leftfiles, leftsteerings) = (leftfiles, [steering+0.5 for steering in leftsteerings])
-#    (rightfiles, rightsteerings) = extract(rows, Right, Steer)
-#    (rightfiles, rightsteerings) = (rightfiles, [steering-0.5 for steering in rightsteerings])
-#    (imagefiles, steerings) = (np.concatenate((centerfiles, leftfiles, rightfiles)), np.concatenate((centersteerings, leftsteerings, rightsteerings)))
-#     (imagefiles, steerings) = shuffle(imagefiles, steerings)
-    
     print ("Steering values: min {} / max {} / average {} ".format(min(steerings), max(steerings), np.mean(steerings)))
     
+    # Doing train/validation/test split:
     x_train, x_val, y_train, y_val = train_test_split(imagefiles, steerings, test_size=0.30, random_state=randint(0,100))
     x_val, x_test, y_val, y_test = train_test_split(x_val, y_val, test_size=0.50, random_state=randint(0,100))
-#     x_train, x_val, y_train, y_val = x_train[0:200], x_val[0:200], y_train[0:200], y_val[0:200]
-    
     print ("Splits [Total {}]: Training = {}, Validation = {}, Test = {}".format(len(imagefiles), len(x_train), len(x_val), len(x_test)))
+
     # Memory-efficient generators
     traindata = datagen(x_train, y_train, trainer.get_image_shape(), flipprob=0.5)
     validationdata = datagen(x_val, y_val, trainer.get_image_shape(), flipprob=0.5)
     testdata = datagen(x_test, y_test, trainer.get_image_shape(), flipprob=0.5)
 
+    # Generators that perform batching
     trainbatcher = batchgen(traindata, args.batch_size)
     validationbatcher = batchgen(validationdata, args.batch_size)
     testbatcher = batchgen(testdata, args.batch_size)
