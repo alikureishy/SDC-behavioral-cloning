@@ -1,4 +1,4 @@
 import vgg16trainer
-import commaaitrainer
+import custom2trainer
 import basetrainer
 import common

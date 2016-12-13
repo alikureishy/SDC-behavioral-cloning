@@ -66,5 +66,6 @@ if __name__ == '__main__':
         print ("Dry run. Nothing will be saved.")
     else:
         trainer.checkpoint()
+        trainer.log_command_args(args)
 
     print ("Thank you! Come again!")

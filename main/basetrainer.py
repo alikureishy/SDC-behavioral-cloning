@@ -3,6 +3,7 @@ from os.path import isfile, isdir
 import os
 from keras.models import model_from_json
 from os import makedirs
+from _datetime import datetime
 
 class BaseTrainer(object):
     def __init__(self, model_name, overwrite=False):
@@ -18,10 +19,10 @@ class BaseTrainer(object):
         self.__compile_model__()
         return self
 
-    @classmethod
     def get_image_shape(self):
-        # TODO: I don't think this will work
-        return self.__model__.input.shape()
+#         return (32, 32)
+        shape = self.__model__.layers[0].input_shape
+        return (shape[1], shape[2]) #list(self.__model__.input.get_shape())
 
     def checkpoint(self):
         (json, hd5) = self.__write_model__()
@@ -47,6 +48,12 @@ class BaseTrainer(object):
     def __create_model__(self):
         raise "Virtual create_model not implemented"
 
+    def __getlogpath__(self, iteration=None):
+        if iteration==None or iteration==0:
+            return os.path.join(self.__model_name__, 'command.log')
+        else:
+            return os.path.join(self.__model_name__, 'command_{}.log'.format(iteration))
+        
     def __getmodelpath__(self, iteration=None):
         if iteration==None or iteration==0:
             return os.path.join(self.__model_name__, 'model.json')
@@ -111,3 +118,26 @@ class BaseTrainer(object):
         self.__id__ = idx
         
         return model
+
+    def log_command_args(self, args):
+        # If no folder exists, no point looking
+        if not isdir(self.__model_name__):
+            makedirs(self.__model_name__)
+        
+        idx = None
+        if self.__overwrite__:
+            idx = self.__id__
+        else:
+            for idx in range(0, 1000):
+                if not isfile(self.__getlogpath__(idx)):
+                    break
+
+        logfile = self.__getlogpath__(idx)
+        print ("Writing command history to file: ", logfile)
+        log = "{}: ; Training: {}; NEpochs: {}; BatchSize: {}\n". format(datetime.now(), args.training_data_folders, args.num_epochs, args.batch_size)
+        with open(logfile, 'w') as lfile:
+            lfile.write(log)
+
+        print ("Command log saved to file: {}".format(logfile))
+
+        return logfile

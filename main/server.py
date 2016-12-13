@@ -38,7 +38,7 @@ def telemetry(sid, data):
     image = resize_image(image, trainer.get_image_shape())
     image = normalize_image(image)
     transformed_image_array = image[None, :, :, :]
-    
+
     # This basetrainer currently assumes that the features of the basetrainer are just the images. Feel free to change this.
     steering_angle = float(trainer.predict(transformed_image_array, batchsize=1))
     # The driving basetrainer currently just outputs a constant throttle. Feel free to edit this.

@@ -10,3 +10,4 @@
     
     
     
+-n commaai1 -t ../data/track1_forward_retain/ ../data/track1_forward_retain/ ../data/track1_forward_return/ ../data/track1_forward_return2/ ../data/track1_forward_return3/ -e 1 -b 100 -a commaai

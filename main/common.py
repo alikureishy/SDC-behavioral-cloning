@@ -6,9 +6,9 @@ import cv2
 import numpy as np
 import itertools
 from os.path import isfile
-from vgg16trainer import VGG16Trainer
-from commaaitrainer import CommaAITrainer
 import random
+from custom1trainer import Custom1Trainer
+from custom2trainer import Custom2Trainer
 
 (Center, Left, Right, Steer, Break, Throttle, Speed) = (0, 1, 2, 3, 4, 5, 6)
 
@@ -76,10 +76,10 @@ def batchgen(iterable, batchsize):
 
 def get_trainer(arch, model_name, overwrite=False):
     trainer = None
-    if arch == 'vgg16':
-        trainer = VGG16Trainer(model_name, overwrite)
-    elif arch=='commaai':
-        trainer = CommaAITrainer(model_name, overwrite)
+    if arch == 'custom1':
+        trainer = Custom1Trainer(model_name, overwrite)
+    elif arch=='custom2':
+        trainer = Custom2Trainer(model_name, overwrite)
     else:
         raise "Not implemented"
     return trainer
