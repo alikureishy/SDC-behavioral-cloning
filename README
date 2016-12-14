@@ -1,5 +1,5 @@
 # Overview
-This application provides utilities to train a model for driving a car through a set of given tracks.
+This application provides utilities to train a driving model to steer a car along .. 
 
 ## Trainer (model.py)
 This tool performs the training. It can be invoked as follows:
@@ -8,4 +8,3 @@ This tool performs the training. It can be invoked as follows:
 ## Server/Driver (drive.py)
 This is the same as 'drive.py' that was provided in the project.
 
- 

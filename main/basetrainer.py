@@ -75,6 +75,7 @@ class BaseTrainer(object):
         if self.__overwrite__:
             idx = self.__id__
         else:
+#             start = self.__id__ if not self.__id__ is None else 0
             for idx in range(0, 1000):
                 if not isfile(self.__getmodelpath__(idx)):
                     break

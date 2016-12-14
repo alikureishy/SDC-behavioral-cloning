@@ -11,3 +11,5 @@
     
     
 -n commaai1 -t ../data/track1_forward_retain/ ../data/track1_forward_retain/ ../data/track1_forward_return/ ../data/track1_forward_return2/ ../data/track1_forward_return3/ -e 1 -b 100 -a commaai
+
+-n custom2/ -t ../data/track1_forward_straight/ ../data/track1_forward_retain/ ../data/track1_reverse_retain/ ../data/track1_forward_turns/ ../data/track1_forward_turns/ ../data/track1_forward_turns/ -e 1 -b 100 -a custom2

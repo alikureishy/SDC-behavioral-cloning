@@ -17,7 +17,7 @@ class Custom2Trainer(BaseTrainer):
         BaseTrainer.__init__(self, model_name, overwrite=overwrite)
 
     def __create_model__(self):
-        row, col, ch = 32, 32, 3 # camera format
+        row, col, ch = 64, 64, 3 # camera format
 
         model = Sequential()
 
