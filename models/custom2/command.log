@@ -1,0 +1,2 @@
+2016-12-13 19:38:21.141978: ; Training: ['../data/track1_forward_straight/', '../data/track1_forward_retain/', '../data/track1_reverse_retain/', '../data/track1_forward_turns/', '../data/track1_forward_turns/', '../data/track1_forward_turns/']; NEpochs: 4; BatchSize: 100
+2016-12-13 19:44:23.865381: ; Training: ['../data/track1_forward_straight/', '../data/track1_forward_retain/', '../data/track1_reverse_retain/', '../data/track1_forward_turns/', '../data/track1_forward_turns/', '../data/track1_forward_turns/', '../data/track1_forward_returns/']; NEpochs: 1; BatchSize: 100
