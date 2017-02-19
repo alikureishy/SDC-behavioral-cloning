@@ -1,8 +1,7 @@
 .DS_Store
 __pycache__
 .ipynb_checkpoints/
-driving_log.csv
-IMG/
+data/
 track1_stable
 track1_recovery
 Default Mac desktop Universal.app/
