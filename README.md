@@ -12,9 +12,108 @@
 
 This application provides utilities to train a model of a car to steer along a simulated race traack, and to then allow that trained model to drive the same car autonomously on the same simulated track.
 
-## Design:
+## Installation
 
-Note: This was one of my first few projects in Python. Please excuse any non-pythonic code.
+This is a python utility requiring the following libraries to be installed prior to use:
+* python (>= 3)
+* numpy
+* keras
+* PIL
+* scikit-learn
+* OpenCV3
+* matplotlib
+
+## Execution
+
+### Trainer (model.py)
+
+This is the trainer that given a network architecture (either in code, or via an existing model.json), iterates over the weights in order to minimze the cost function. Each invocation would specify the number of epochs to train over. Since the model is committed to disk each time, and relaoded from disk on subsequent iterations, it is feasible to run the training utility iteratively until a satisfactory performance is achieved.
+
+It is a command line utility, with a sample invocation as follows:
+
+```
+/Users/safdar/git/behavioral-cloning/main> python3.5 model.py -n custom2/ -t ../data/track2_forward_turns/ -e 1 -b 100 -a custom2
+```
+
+Here's the help menu:
+
+```
+usage: model.py [-h] -n MODEL_NAME -a ARCH -t
+                [TRAINING_DATA_FOLDERS [TRAINING_DATA_FOLDERS ...]]
+                [-e NUM_EPOCHS] [-b BATCH_SIZE] [-o] [-r]
+
+Remote Driving
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -n MODEL_NAME, --model_name MODEL_NAME
+                        Name of FOLDER where the model files reside.
+  -a ARCH, --arch ARCH  Architecture of model. [custom1, custom2]
+  -t [TRAINING_DATA_FOLDERS [TRAINING_DATA_FOLDERS ...]], --training_data_folders [TRAINING_DATA_FOLDERS [TRAINING_DATA_FOLDERS ...]]
+                        Space-separated list of 1 or more folders containing
+                        training data (driving_log and IMG folders).
+  -e NUM_EPOCHS, --num_epochs NUM_EPOCHS
+                        Number of epochs to train on prior to checkpointing
+                        the updated model.
+  -b BATCH_SIZE, --batch_size BATCH_SIZE
+                        Size of the training, validation and test batches.
+  -o, --overwrite       Overwrite model files after training if they already
+                        exist (default: false)
+  -r, --dry_run         Dry run. Will not attempt to save anything.
+```
+
+### Driver (drive.py)
+
+This is the server that 'drives' the car when the simulation is in autonomous mode. The simulation acts as the client, requesting navigation instructions for each image. The server receives each image from the simulation (client), and then feeds it through the trained neural network model to determine the steering angle required at that point, which it then returns to the client for enforcement.
+
+It is a command line utility, with a sample invocation as follows:
+
+```
+/Users/safdar/git/behavioral-cloning/main> python3.5 drive.py -n custom2 -a custom2
+```
+
+Here's the help menu:
+
+```
+usage: drive.py [-h] -n MODEL_NAME -a ARCH
+
+Remote Driving
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -n MODEL_NAME, --model_name MODEL_NAME
+                        Path to basetrainer definition json. Model weights
+                        should be on the same path.
+  -a ARCH, --arch ARCH  Architecture of model. [vgg16, googlenet, commaai,
+                        none]
+```
+
+## Design
+
+Note: This was one of my first forays into Python. Please excuse any non-pythonic code.
+
+### Training Data:
+This is a work in progress. Due to the absence of a the requisite gaming control, I had to generate training data
+using the keyboard, which causes several problems:
+	- The driving can be jittery at times
+	- Recovery from road sides back towards the road are occasionally sudden, excessive, or insufficient.
+I did not have access to a gaming control (such as for PS3) to generate the training data, which is a crucial step
+for training this model. Keyboard data has the disadvantage of having a majority of 0s, which can cause the model
+to settle into a suboptimal local minima during training. This manifests itself as a constant valued steering angle
+that gets returned to the simulator. Generating more recovery data (of the car returning to the center after veering
+off to the sides) helps avoid, or get out of, these local minima. The importance of good data cannot be overstated!
+
+### Data Preparation
+
+This is a work in progress. Due to the absence of a the requisite gaming control, I had to generate training data
+using the keyboard, which causes several problems:
+	- The driving can be jittery at times
+	- Recovery from road sides back towards the road are occasionally sudden, excessive, or insufficient.
+I did not have access to a gaming control (such as for PS3) to generate the training data, which is a crucial step
+for training this model. Keyboard data has the disadvantage of having a majority of 0s, which can cause the model
+to settle into a suboptimal local minima during training. This manifests itself as a constant valued steering angle
+that gets returned to the simulator. Generating more recovery data (of the car returning to the center after veering
+off to the sides) helps avoid, or get out of, these local minima. The importance of good data cannot be overstated!
 
 I have tried to design the utility in a way that allowed me to:
 * Support a plug-and-play sort of mechanism to easily build and test different kinds of model architectures (CNNS) and associated weights.
@@ -69,15 +168,10 @@ Out-of-box example:
 
 ## Limitations
 
-### Training Data:
-This is a work in progress. Due to the absence of a the requisite gaming control, I had to generate training data
-using the keyboard, which causes several problems:
-	- The driving can be jittery at times
-	- Recovery from road sides back towards the road are occasionally sudden, excessive, or insufficient.
-I did not have access to a gaming control (such as for PS3) to generate the training data, which is a crucial step
-for training this model. Keyboard data has the disadvantage of having a majority of 0s, which can cause the model
-to settle into a suboptimal local minima during training. This manifests itself as a constant valued steering angle
-that gets returned to the simulator. Generating more recovery data (of the car returning to the center after veering
-off to the sides) helps avoid, or get out of, these local minima. The importance of good data cannot be overstated!
+### Throttle
+
+A future version of this utility could not only return just steering angles, but also throttle values. At present the throttle is hard-coded and the same value is returned each time to the simulation client. Implementing this functionality will require training the corresponding model to output not just the steering angle, but also the throttle. Intuitively, this would be quite straightforward, since the throttle value would be inversely correlated to the steering angle being returned -- navigating a curved road would require a higher steering angle, and correspondngly a lower throttle value, and similarly, a straight road would require a lower steering angle, but a correspondingly higher throttle value.
+
+A possible challenge, in a more advanced training scenario, would be to train the network not just on input images, but also with the present throttle value. This would achieve a more accurate and responsive network than one that would be trained just with input images. It is left as a future enhancement.
 
 
