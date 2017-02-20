@@ -116,6 +116,7 @@ Custom1 and Custom2 (at the moment) are the only two model options used, with ea
 #### 'Custom1'
 
 
+
 #### 'Custom2'
 
 
@@ -147,7 +148,15 @@ With the random vertical flip happening during training, such recovery data woul
 
 #### Absence of a Gaming Controller
 
-Using a gaming controller (such as for PS3) to generate the training data would have yielded far better/smoother data for training this model. Keyboard data has the problem of having a majority of 0s, mixed with some choppy non-zero steering values. When used for training, this data causes the model to settle into a suboptimal minima (perhaps even a bad global minima), which manifests itself as a constant valued steering angle that gets returned to the simulator by the server. (For example, 0.0833246152). This is my conclusion because the value generated was awfully close to the mean of the training dataset. Since a majority of training data was zero, it actually makes sense because in that case, settling into a value close to the mean would likely achieve the lowest cost across the space of most reachable model weights closest to the randomly selected initial weight values (based on the glorot_uniform weight distribution algorithm used by default). Any other minima, in hindsight, would be inappropriate. A higher proportion of non-zero (smoothed) values is necessary to yield a better gradient landscape.
+Using a gaming controller (such as for PS3) to generate the training data would have yielded far better/smoother data for training this model. Keyboard data has the problem of having a majority of 0s, mixed with some choppy non-zero steering values.
+
+##### Bad model-weight landscape
+
+When used for training, this data causes the gradient landscape to have a bad global minima (or set of global minima), which manifested themselves as constant valued steering angles (for example, 0.0833246152) that got returned to the simulator by the trained model (despite multiple attempts at shuffled training). No amount of hyperparams would avoid, or get the model out of that minima either, since any neighboring minima in that landscape would very likely achieve a similar outcome.
+
+This is my conclusion because the value generated was awfully close to the mean of the training dataset. Since a majority of training data was zero, it actually makes sense because in that case, settling into a value close to the mean would likely achieve the lowest cost across the space of most reachable model weights closest to the randomly selected initial weight values (based on the glorot_uniform weight distribution algorithm used by default). Any other minima, in hindsight, would be inappropriate. A higher proportion of non-zero (smoothed) values is necessary to yield a better gradient landscape.
+
+##### Workaround
 
 I did not have a gaming controller (and was reluctant to feed consumerism by purchasing one just for this project). So, I had to look for workarounds. One remedy for this was to smoothen the data to readjust zero values into a more uniform distribution within the steering range. However, this effort would require more investigation, for which I did not have sufficient time. This is an area of further improvement. In hindsight, buying the controller might have saved me even more time!
 
@@ -193,7 +202,7 @@ A future version of this utility could not only return just steering angles, but
 
 A possible challenge, in a more advanced training scenario, would be to train the network not just on input images, but also with the present throttle value. This would achieve a more accurate and responsive network than one that would be trained just with input images. It is left as a future enhancement.
 
-### Using left and right camera images for automatic recovery training
+### Automatic recovery training
 
 As discussed above, the left and right camera images could theoretically be used as training data by adjusting the steering angle corresponding to that row of data in driving_log.csv. The specific amount of this adjustment required investigation, for which I did not have the time, since training the model itself took quite a while (generally >10 mins). Furthermore, the absence of smooth training data would have made this hyperparam search even more exhausting and time consuming. There is precedent however, for successfully using these images, so this remains an item for future enhancement.
 
