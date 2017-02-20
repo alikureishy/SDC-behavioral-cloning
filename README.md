@@ -1,12 +1,13 @@
 <!--- Adding links to various images used in this document --->
-[Simulator-Straight]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/illustration1.png "Straight"
-[Simulator-LeftTurn]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/illustration2.png "Left Turn"
-[Simulator-SharpLeftTurn]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/illustration3.png "Sharp Left Turn"
-[Simulator-SharpRightTurn]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/illustration4.png "Sharp Right Turn"
+[Left]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration1.png "Left"
+[Straight]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration2.png "Straight"
+[LeftSharp]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration3.png "Left Sharp"
+[CrossLineLeft]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration4.png "Cross Line Left"
+[RightSharp]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration5.png "Right Sharp"
 
 # Behavioral Cloning - Racetrack Driving
 
-![Simulator-SharpRightTurn]
+![LeftSharp]
 
 ## Overview
 
