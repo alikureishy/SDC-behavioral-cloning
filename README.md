@@ -3,7 +3,7 @@
 [Straight]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration2.png "Straight"
 [LeftSharp]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration3.png "Left Sharp"
 [CrossLineLeft]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration4.png "Cross Line Left"
-[RightSharp]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration5.png "Right Sharp"
+[RightSharp]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration5.png "Right Sharp"[BadTurn]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration6.png "Bad Turn"
 
 # Behavioral Cloning - Racetrack Driving
 
@@ -181,8 +181,6 @@ This architecture was minutely better than the previous one. It also performs be
         return model
 ```
 
-The snag that this model hits with the 2nd race track is because it does not generalize the recovery data well enough. At one point when the road curves left, the car runs into the side of the road without attempting recovery. My belief is that this happened because the cues that caused the recovery to kick in on the 1st track, were not generalized well enough for the 2nd track. More specifically, the 
-
 ### Training Data:
 
 Training data is generated using the simulator in 'training' mode. The training output from a given run is a folder containing:
@@ -258,6 +256,14 @@ Here are a few desired outcomes toward which I targeted the design:
 * Support a plug-and-play sort of mechanism to test different kinds of model architectures and associated weights without the administrative overhead of keeping track of numerous hyperparams.
 * Continue training of an aborted iteration by saving models/weights after each epoch, and re-loading the latest saved trained models/weights on each launch of trainer.py.
 * Read training batches from disk (so as to limit memory consumption). Batch size depends on how much is read from disk at a time.
+
+## Performance on track # 2
+
+Performance of both model architectures above were pretty good on track # 2, except that at some point the car does not recover fast enough at some point down the road and runs into the side.
+
+The cause seems to be that the cues that triggered recovery actions by the model on the 1st track, were not generalized by it well enough for the 2nd track. As illustrated below, for example, the presence of .
+
+![BadTurn]
 
 ## Limitations
 
