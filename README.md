@@ -116,11 +116,15 @@ This base class (arguably abstract) provides basic utilities like reading the mo
 
 I wanted to be able to switch between models on the fly, so as to try out their performance without much bookkeeping overhead. Adding more models requires creating a new subclass of BaseTrainer and overriding one or two methods to build the model pipeline and choose the compile options. This was probably an overkill for this particular project, but should come in handy for later, I'm hoping.
 
-Custom1 and Custom2 (the only two model options used), are examples of the above, with each performing relatively the same as the other on the graded race track.
+Custom1 and Custom2 (the only two model options used), are examples of the above, with the second performing significantly better than the first, for reasons outlined below.
 
 #### 'Custom1' Model Architecture
 
-Despite performance being nearly the same, this architecture was arguably not as good as the next, mostly on account of not using any dropouts. It was therefore prone to overfitting.
+The first attempt at a neural network consisted of 2 Convolutional + MaxPooling layers, each followed by a RELU activation. The output from the 2nd conv net was then flattened and passed through 3 dense layers of gradually decreasing inputs, until the final output.
+
+This architecture was arguably prone to overfitting, not only by the fact that it had more dense layers than necessary, but also because it did not utilize any dropouts. In fact, the trained model did overfit to the training data, and consequently produces a saw-tooth/see-saw pattern that inevitably leads the car off the road even before reaching the straight bridge.
+
+Furthermore, it may also be the case that sufficient nuances were not extracted by the model in the first 2 conv net layers, on account of accepting just 32x32 inputs, though it should be mentioned that that is not a part of the model architecture.
 
 ```
         row, col, ch = 32, 32, 3 # camera format
@@ -152,7 +156,11 @@ Despite performance being nearly the same, this architecture was arguably not as
 
 #### 'Custom2' Model Architecture
 
-This architecture was minutely better than the previous one. It also performs better on the 2nd race track, since it generalizes better than the first, even though it does hit a snag in the 2nd track due to some defficiency with the training data from the first.
+This architecture was far better than the previous one, since it generalizes better than the first, even though it does hit a snag in the 2nd track due to some defficiency with the training data from the first.
+
+As can be seen, it employs 2 dropouts, one at the 2nd convnet, and one at the dense layer right before the final output layer. It also employes the ELU activation function that is more advanced than RELU and seems to perform better in this case.
+
+It might also be the case that the 64x64 sized input to the network allowed a more nuanced feature extraction by the first two convenets, though it should be mentioned that that is not a part of the model architecture.
 
 ```
         row, col, ch = 64, 64, 3 # camera format
