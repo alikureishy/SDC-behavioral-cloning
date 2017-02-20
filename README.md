@@ -21,6 +21,7 @@ This is a python utility requiring the following libraries to be installed prior
 * python (>= 3)
 * numpy
 * keras
+* tensorflow
 * PIL
 * scikit-learn
 * OpenCV3
@@ -104,14 +105,40 @@ I have tried to design the utility in a way that allowed me to:
 * Read training batches from disk (so as to limit memory consumption). Batch size depends on how much is read from disk at a time.
 
 ### Training Data:
-This is a work in progress. Due to the absence of a the requisite gaming control, I had to generate training data
-using the keyboard, which causes several problems:
-	- The driving can be jittery at times
-	- Recovery from road sides back towards the road are occasionally sudden, excessive, or insufficient.
-I did not have access to a gaming control (such as for PS3) to generate the training data, which is a crucial step
-for training this model. Keyboard data has the disadvantage of having a majority of 0s, which can cause the model
-to settle into a suboptimal local minima during training. This manifests itself as a constant valued steering angle
-that gets returned to the simulator. Generating more recovery data (of the car returning to the center after veering
+
+#### Recovery Data
+
+Driving around the track would only generate data to try and keep the car in the middle of the road from losing its center position. However, data is also needed to train the model to return the car back to the center, in case of steering off too far to the left or right, which has a high likelihood of happening.
+
+There were two options to achieve this:
+* Training explicit recovery data
+* Using the left and right camera images (with an adjustment to the steering value)
+
+After attempting the second option for some time, I chose to instead implement the first option, since the former would require further investigation of the steering adjustments, for which I did not have the time. This is an area of further improvement.
+
+I trained recovery data in training mode by taking the car closer to the edge, or over the edge, and then capturing the data when returning the car to the center. Here is an illustration:
+
+![CrossLineLeft]
+
+Recovery data is required for returning from both sides of the road, not just the left, and for sharper road curvatures as well, in which case the manouvering required is more extreme. Here is an illustration of a sharp right turn recorded on one of the sharpest points of the road, to avoid the comman problem of the car falling into the lake:
+
+![RightSharp]
+
+With the random vertical flip happening during training, such recovery data would also train the car to return to the center on a road sharply curving towards the left. Care has to be taken to record enough such data for the model to be able to generalize, but also not too much to cause the car to saw-tooth left-to-right in autonomous mode.
+
+#### Absence of a Gaming Controller
+
+I did not have access to a gaming control (such as for PS3) to generate the training data, which would have yielded better data for training this model. Keyboard data has the disadvantage of having a majority of 0s, mixed together with some choppy non-zero steering values, while using a gaming controller would have a more uniform distribution of values between the extremes, and not centered on 0.
+
+Due to this:
+* The driving can be jittery at times
+* Recovery from road sides back towards the road are occasionally sudden, excessive, or insufficient.
+
+I overcame this by dropping a majority of data that contained zero steering values, and by gathering more recovery data.
+
+There are a couple of potential solutions. One, the steering values over a total ordering of the data. Excessive 0s can cause the model to settle into a suboptimal local minima during training, which manifests itself as a constant valued steering angle that gets returned to the simulator by the server.
+
+Generating more recovery data (of the car returning to the center after veering
 off to the sides) helps avoid, or get out of, these local minima. The importance of good data cannot be overstated!
 
 ### Data Manipulation
@@ -152,5 +179,10 @@ Custom1 and Custom2 (at the moment) are the only two model options. I wanted to 
 A future version of this utility could not only return just steering angles, but also throttle values. At present the throttle is hard-coded and the same value is returned each time to the simulation client. Implementing this functionality will require training the corresponding model to output not just the steering angle, but also the throttle. Intuitively, this would be quite straightforward, since the throttle value would be inversely correlated to the steering angle being returned -- navigating a curved road would require a higher steering angle, and correspondngly a lower throttle value, and similarly, a straight road would require a lower steering angle, but a correspondingly higher throttle value.
 
 A possible challenge, in a more advanced training scenario, would be to train the network not just on input images, but also with the present throttle value. This would achieve a more accurate and responsive network than one that would be trained just with input images. It is left as a future enhancement.
+
+### Using Left and Right Camera Images
+
+### Data Smoothing
+
 
 
