@@ -109,16 +109,79 @@ For playing with different model architectures, I used inheritance:
 	- custom2trainer.py
 	- ...more coming...
 	
-BaseTrainer provides basic utilities like reading the model/weights from disk, and writing out to disk, and training.
+#### 'BaseTrainer'
 
-Custom1 and Custom2 (at the moment) are the only two model options used, with each performing relatively the same as the other. I wanted to be able to switch between models on the fly, so as to try out their performance without much bookkeeping overhead. Adding more models requires creating a new subclass of BaseTrainer and overriding one or two methods to build the model pipeline and choose the compile options. This was probably an overkill for this particular project, but should come in handy for later, I'm hoping.
+This base class (arguably abstract) provides basic utilities like reading the model/weights from disk, and writing out to disk, and training.
 
-#### 'Custom1'
+I wanted to be able to switch between models on the fly, so as to try out their performance without much bookkeeping overhead. Adding more models requires creating a new subclass of BaseTrainer and overriding one or two methods to build the model pipeline and choose the compile options. This was probably an overkill for this particular project, but should come in handy for later, I'm hoping.
 
+Custom1 and Custom2 (the only two model options used), are examples of the above, with each performing relatively the same as the other on the graded race track.
 
+#### 'Custom1' Model Architecture
 
-#### 'Custom2'
+Despite performance being nearly the same, this architecture was arguably not as good as the next, mostly on account of not using any dropouts. It was therefore prone to overfitting.
 
+```
+        row, col, ch = 32, 32, 3 # camera format
+
+        model = Sequential()
+
+        model.add(Convolution2D(16, 3, 3, border_mode="same", input_shape=(row, col, ch)))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Activation('relu'))
+
+        model.add(Convolution2D(32, 3, 3, border_mode="same"))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Activation('relu'))
+
+        model.add(Flatten())
+	
+        model.add(Dense(100))
+        model.add(Activation('relu'))
+        
+        model.add(Dense(75))
+        model.add(Activation('relu'))
+	
+        model.add(Dense(50))
+        model.add(Activation('relu'))
+	
+        model.add(Dense(1))
+        return model
+```
+
+#### 'Custom2' Model Architecture
+
+This architecture was minutely better than the previous one. It also performs better on the 2nd race track, since it generalizes better than the first, even though it does hit a snag in the 2nd track due to some defficiency with the training data from the first.
+
+```
+        row, col, ch = 64, 64, 3 # camera format
+
+        model = Sequential()
+
+        model.add(Convolution2D(16, 3, 3, border_mode="same", input_shape=(row, col, ch)))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(ELU())
+
+        model.add(Convolution2D(32, 3, 3, border_mode="same"))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Dropout(0.50))
+        model.add(ELU())
+
+        model.add(Flatten())
+        
+        model.add(Dense(200))
+        model.add(ELU())
+
+        model.add(Dense(100))
+        model.add(Dropout(0.5))
+        model.add(ELU())
+	
+        model.add(Dense(1))
+        
+        return model
+```
+
+The snag that this model hits with the 2nd race track is because it does not generalize the recovery data well enough. At one point when the road curves left, the car runs into the side of the road without attempting recovery. My belief is that this happened because the cues that caused the recovery to kick in on the 1st track, were not generalized well enough for the 2nd track. More specifically, the 
 
 ### Training Data:
 
