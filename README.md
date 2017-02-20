@@ -128,18 +128,20 @@ With the random vertical flip happening during training, such recovery data woul
 
 #### Absence of a Gaming Controller
 
-I did not have access to a gaming control (such as for PS3) to generate the training data, which would have yielded better data for training this model. Keyboard data has the disadvantage of having a majority of 0s, mixed together with some choppy non-zero steering values, while using a gaming controller would have a more uniform distribution of values between the extremes, and not centered on 0.
+Using a gaming controller (such as for PS3) to generate the training data would have yielded far better/smoother data for training this model. Keyboard data has the problem of having a majority of 0s, mixed with some choppy non-zero steering values. When used for training, this data causes the model to settle into a suboptimal local minima, which manifests itself as a constant valued steering angle that gets returned to the simulator by the server. (For example, 0.0833246152).
 
-Due to this:
-* The driving can be jittery at times
-* Recovery from road sides back towards the road are occasionally sudden, excessive, or insufficient.
+I did not have a gaming controller (and was reluctant to feed consumerism by purchasing one just for this project). So, I had to find workarounds. One remedy for this was to smoothen the data to readjust zero values into a more uniform distribution within the steering range. However, this effort would require more investigation, for which I did not have sufficient time. This is an area of further improvement.
 
-I overcame this by dropping a majority of data that contained zero steering values, and by gathering more recovery data.
+Instead of the above, I achieved a reasonable outcome by:
+* *dropping* a majority of data that contained zero steering values,
+* recording a wider range of recovery data than would otherwise have been required, and
+* recording a lot more data overall, since dropping zeros significantly reduced the amount of training data available.
 
-There are a couple of potential solutions. One, the steering values over a total ordering of the data. Excessive 0s can cause the model to settle into a suboptimal local minima during training, which manifests itself as a constant valued steering angle that gets returned to the simulator by the server.
+Still, absence of smoothing and/or a gaming controller and dropping of zeros meant that the training data was typically skewed further away from zero than it should be for a smoother ride. As a result:
+* Autonomous driving was jittery
+* Recovery actions were generally more sudden and occasionally excessive, causing the car to overshoot the center (saw-tooth).
 
-Generating more recovery data (of the car returning to the center after veering
-off to the sides) helps avoid, or get out of, these local minima. The importance of good data cannot be overstated!
+The importance of good data cannot be overstated!
 
 ### Data Manipulation
 
