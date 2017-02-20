@@ -148,7 +148,9 @@ With the random vertical flip happening during training, such recovery data woul
 
 #### Absence of a Gaming Controller
 
-Using a gaming controller (such as for PS3) to generate the training data would have yielded far better/smoother data for training this model. Keyboard data has the problem of having a majority of 0s, mixed with some choppy non-zero steering values.
+Using a gaming controller (such as for PS3) to generate the training data would have yielded far better/smoother data for training this model. Keyboard data has the problem of having a majority of 0s, mixed with some choppy non-zero steering values. Most of the contribution of zeros would come from the straight patches of road (illustrated below), but also to a lesser degree from curved roads, depending on the sampling rate of the training mode.
+
+![Straight]
 
 ##### Bad model-weight landscape
 
