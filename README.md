@@ -69,7 +69,7 @@ optional arguments:
 The '-' option, when specified, causes the trainer to write back a trained model over any existing model/weight file that it was previously read from. If not specified, subsequently trained generations of the model are written out to new model/weight files suffixed with an incremental integer value.
 
 
-### Driver (drive.py)
+### Autonomous Driver (drive.py)
 
 This is the server that 'drives' the car when the simulation is in autonomous mode. The simulation acts as the client, requesting navigation instructions for each image. The server receives each image from the simulation (client), and then feeds it through the trained neural network model to determine the steering angle required at that point, which it then returns to the client for enforcement.
 
@@ -99,12 +99,31 @@ optional arguments:
 
 ## Design
 
-I have tried to design the utility in a way that allowed me to:
-* Support a plug-and-play sort of mechanism to easily build and test different kinds of model architectures and associated weights.
-* Re-load existing trained models/weights if they were already saved to disk.
-* Read training batches from disk (so as to limit memory consumption). Batch size depends on how much is read from disk at a time.
+This section will go over various aspects of the design, including the training data, the data preparation, model architecture, and some miscellaneous other features.
+
+### Different model architectures
+
+For playing with different model architectures, I used inheritance:
+- basetrainer.py
+	- custom1trainer.py
+	- custom2trainer.py
+	- ...more coming...
+	
+BaseTrainer provides basic utilities like reading the model/weights from disk, and writing out to disk, and training.
+
+Custom1 and Custom2 (at the moment) are the only two model options used, with each performing relatively the same as the other. I wanted to be able to switch between models on the fly, so as to try out their performance without much bookkeeping overhead. Adding more models requires creating a new subclass of BaseTrainer and overriding one or two methods to build the model pipeline and choose the compile options. This was probably an overkill for this particular project, but should come in handy for later, I'm hoping.
+
+#### 'Custom1'
+
+
+#### 'Custom2'
+
 
 ### Training Data:
+
+Training data is generated using the simulator in 'training' mode. The training output from a given run is a folder containing:
+- IMG: 			This is a folder containing all the training images, in groups of 3, for the left, center and right çamera images obtained at each instant of the simulation.
+- driving_log.csv: 	CSV file containing the full paths to each group of images under IMG/, and the corresponding throttle, steering angle etc values corresponding to the 'correct' course(s) of action.
 
 #### Recovery Data
 
@@ -143,18 +162,16 @@ Still, absence of smoothing and/or a gaming controller and dropping of zeros mea
 
 The importance of good data cannot be overstated!
 
-### Data Manipulation
-
-Training data is generated using the simulator in 'training' mode. The training output from a given run is a folder containing:
-- IMG: 			This is a folder containing all the training images, in groups of 3, for the left, center and right çamera images obtained at each instant of the simulation.
-- driving_log.csv: 	CSV file containing the full paths to each group of images under IMG/, and the corresponding throttle, steering angle etc values corresponding to the 'correct' course(s) of action.
+#### Data Augmentation/Adjustment
 
 Before being used for training, the labeled images are passed through a 'training prep' pipeline, which includes:
 * resizing the images to a fixed (configurable) size based on the network architecture: This allows flexibility for training the same model using training data of varying resolutions.
 * normalize the pixels in each image read from disk: To achieve a better training outcome.
 * randomly flipping images around the vertical axis (to achieve a 50/50 distribution): This renders it unnecessary to training data on the race course in the reverse direction.
 
-### Data Preparation
+Note: When processing real data through the trained model in autonomous mode, the last step (randomly flipping images) was not performed, for obvious reasons.
+
+#### Data Preparation
 
 A train/test/validation split (with a 70/15/15 ratio) is achieved using sklearn's train_test_split() API. The validation split is used to check the accuracy of the model at the end of each training epoch. The test set returns the final test output, the goal being to not overtrain data using the test set, but instead, to rely on just the validation data.
 
@@ -162,17 +179,11 @@ Shuffling is possible because the actual driving log does not contain images, an
 
 Batching is performed using the 'Generator' functionality in python. By invoking keras' fit_generator() API, this generator can be used to generate batches of training data, only reading the images into memory when the fit_generator() retrieves it. At this point, the images are put through the 'training prep' pipeline, before being fed into the network.
 
-### Different model architectures
-
-For playing with different model architectures, I used inheritance:
-- basetrainer.py
-	- custom1trainer.py
-	- custom2trainer.py
-	- ...more coming...
-	
-BaseTrainer provides basic utilities like reading the model/weights from disk, and writing out to disk, and training.
-
-Custom1 and Custom2 (at the moment) are the only two model options. I wanted to be able to switch between models on the fly, so as to try out their performance without much bookkeeping overhead. Adding more models requires creating a new subclass of BaseTrainer and overriding one or two methods to build the model pipeline and choose the compile options. This was probably an overkill for this particular project, but should come in handy for later, I'm hoping.
+### Other features
+Here are a few desired outcomes toward which I targeted the design:
+* Support a plug-and-play sort of mechanism to test different kinds of model architectures and associated weights without the administrative overhead of keeping track of numerous hyperparams.
+* Continue training of an aborted iteration by saving models/weights after each epoch, and re-loading the latest saved trained models/weights on each launch of trainer.py.
+* Read training batches from disk (so as to limit memory consumption). Batch size depends on how much is read from disk at a time.
 
 ## Limitations
 
