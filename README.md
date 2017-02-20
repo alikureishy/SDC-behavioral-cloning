@@ -3,7 +3,8 @@
 [Straight]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration2.png "Straight"
 [LeftSharp]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration3.png "Left Sharp"
 [CrossLineLeft]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration4.png "Cross Line Left"
-[RightSharp]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration5.png "Right Sharp"[BadTurn]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration6.png "Bad Turn"
+[RightSharp]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration5.png "Right Sharp"
+[BadTurn]: https://github.com/safdark/behavioral-cloning/blob/master/doc/images/bc_illustration6.png "Cross Line Left"
 
 # Behavioral Cloning - Racetrack Driving
 
@@ -261,7 +262,7 @@ Here are a few desired outcomes toward which I targeted the design:
 
 Performance of both model architectures above were pretty good on track # 2, except that at some point the car does not recover fast enough at some point down the road and runs into the side.
 
-The cause seems to be that the cues that triggered recovery actions by the model on the 1st track, were not generalized by it well enough for the 2nd track. As illustrated below, for example, the presence of .
+The cause seems to be that the cues that triggered recovery actions by the model on the 1st track, were not generalized by it well enough for the 2nd track. In fact, what actually happens is that the model does try to recover when it nears that boundary, but doesn't recover aggressively enough to match the curvature. As illustrated below, it is possible that the presence of the poles holding up the "<" signs *above* the road, by appearing like straight lines, might have confused the model to think that the curvature of the road is not as high as it actually was. Perhaps this cue influenced the model output more strongly than that of the actual road curvature formed by the yellow pollen/leaves, conceivably because the cues for road curvature were based more on clearer (more well defined) boundary lines as present in the track 1 images. The more fuzzy nature of the scattered yello pollen/leaves in track 2 may not have been given as high a weightage as perhaps the more clearly defined straight poles seemingly pointing directionally forward.
 
 ![BadTurn]
 
