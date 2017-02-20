@@ -37,7 +37,7 @@ This is the trainer that given a network architecture (either in code, or via an
 It is a command line utility, with a sample invocation as follows:
 
 ```
-/Users/safdar/git/behavioral-cloning/main> python3.5 model.py -n custom2/ -t ../data/track2_forward_turns/ -e 1 -b 100 -a custom2
+/Users/safdar/git/behavioral-cloning/main> python3.5 model.py -n ../models/custom2/ -t ../data/track2_forward_turns/ ............... -e 1 -b 100 -a custom2
 ```
 
 Here's the help menu:
@@ -77,7 +77,7 @@ This is the server that 'drives' the car when the simulation is in autonomous mo
 It is a command line utility, with a sample invocation as follows:
 
 ```
-/Users/safdar/git/behavioral-cloning/main> python3.5 drive.py -n custom2 -a custom2
+/Users/safdar/git/behavioral-cloning/main> python3.5 drive.py -n ../models/custom2 -a custom2
 ```
 
 Here's the help menu:
